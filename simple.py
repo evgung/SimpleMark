@@ -133,7 +133,7 @@ class SimpleMark(QMainWindow):
             self.frames_per_second = init_work_window.frames_per_second
             self.vfe = VideoFrameExtractor(self.video_path, self.saves_path, self.frames_per_second, self.save_width, self.result_width)
             self.frame_path, self.frame_name = self.vfe.getInfo()
-            additional_thread = Thread(target = self.vfe.extract_frames)
+            additional_thread = Thread(target=self.vfe.extract_frames)
             additional_thread.start()
             # asyncio.run(self.vfe.extract_frames())
             time.sleep(1 / self.frames_per_second + 2)
