@@ -234,7 +234,7 @@ class SimpleMark(QMainWindow):
         init_work_window.exec()
         if init_work_window.is_initialized:
             self.video_path = init_work_window.path_to_video[0]
-            self.saves_path = init_work_window.path_to_save + init_work_window.name_of_save_folder + '/'
+            self.saves_path = os.path.join(init_work_window.path_to_save, init_work_window.name_of_save_folder)
             self.save_width = init_work_window.save_width
             self.result_width = init_work_window.result_width
             self.frames_per_second = init_work_window.frames_per_second

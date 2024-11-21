@@ -6,7 +6,7 @@ import time
 class VideoFrameExtractor:
     def __init__(self, video_file, output_dir="frames2", fps=10, save_width=True, frame_width=800):
         self.video_file = video_file
-        self.output_dir = output_dir + 'frames/'
+        self.output_dir = os.path.join(output_dir, 'frames')
         self.frame_width = frame_width  # если указано изменение ширины
         self.frame_counter = 0
         self.camera = None
@@ -34,7 +34,7 @@ class VideoFrameExtractor:
 
     def getInfo(self):
         vid_name = self.getVideoName(self.video_file).split('.')[0]
-        self.fp = self.output_dir + vid_name + '_'
+        self.fp = os.path.join(self.output_dir, vid_name + '_')
         self.fn = vid_name + '_'
         return self.fp, self.fn
 
