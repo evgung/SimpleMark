@@ -10,7 +10,7 @@ if __name__ == '__main__':
     myappid = 'donttouchifworking.simplemark.one.1'
     QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(".venv/Images/logo.png"))
+    app.setWindowIcon(QIcon("Images/logo.png"))
     sm = SimpleMark()
     sm.setStyleSheet(styles.main_style)
     sm.showMaximized()

@@ -21,14 +21,16 @@ class Saver:
         self.config_file = os.path.join(project_path, "config.pkl")
         self.info_path = os.path.join(project_path, "info")
         if not os.path.exists(self.info_path):
-            os.mkdir(self.info_path)
+            os.makedirs(self.info_path)
 
-    def saveProject(self, last_frame_number, path_to_video, last_extracted_frame_number, fps):
+    def saveProject(self, last_frame_number, path_to_video, last_extracted_frame_number, fps, image_name, image_path):
         properties = {
             "last_frame_number": last_frame_number,
             "path_to_video": path_to_video,
             "last_extracted_frame_number": last_extracted_frame_number,
-            "fps": fps
+            "fps": fps,
+            "image_name": image_name,
+            "image_path": image_path
         }
 
         with open(self.config_file, 'wb') as config:
