@@ -13,12 +13,15 @@
 import os
 import pickle
 
+
 class Saver:
 
     def __init__(self, project_path):
         self.project_path = project_path
         self.config_file = os.path.join(project_path, "config.pkl")
         self.info_path = os.path.join(project_path, "info")
+        if not os.path.exists(self.info_path):
+            os.mkdir(self.info_path)
 
     def saveProject(self, last_frame_number, path_to_video, last_extracted_frame_number, fps):
         properties = {
@@ -33,5 +36,7 @@ class Saver:
 
     # points - массив объектов класса Point
     def saveFramePoints(self, frame_number, points):
+        if len(points) == 0:
+            return
         with open(os.path.join(self.info_path, str(frame_number)), 'wb') as frame_file:
             pickle.dump(points, frame_file)
