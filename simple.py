@@ -164,7 +164,7 @@ class SimpleMark(QMainWindow):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Left or event.key() == Qt.Key_A:
             self.toPreviousImage()
-        if event.key() == Qt.Key_Right or event.key() == Qt.Key_F:
+        if event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
             self.toNextImage()
 
     def mouseReleaseEvent(self, event):
