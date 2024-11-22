@@ -42,8 +42,8 @@ class VideoFrameExtractor:
         vid_name = self.getVideoName(self.video_file).split('.')[0]
         last_time = 0
         while True:
+            ok_flag, frame = self.camera.read()
             if time.time() - last_time >= self.cooldown:
-                ok_flag, frame = self.camera.read()
                 if ok_flag:
                     file_name = ""
                     if not self.save_width:
