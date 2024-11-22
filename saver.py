@@ -63,7 +63,3 @@ class Saver:
         cropped_image = frame[y - half:y + half, x - half:x + half]
         result_name = os.path.join(self.dataset_path, str(image_number) + '.png')
         cv2.imwrite(result_name, cropped_image)
-
-
-saver = Saver("D:\\SimpleMark\\Project")
-saver.saveDataset("D:\\SimpleMark\\Project\\frames\\SYKA_")
