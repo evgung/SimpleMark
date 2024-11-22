@@ -126,6 +126,10 @@ class SimpleMark(QMainWindow):
         open_action.setShortcut(QtGui.QKeySequence("Ctrl+O"))
         open_action.triggered.connect(self.openOldProject)
 
+        fin_action = QAction("Собрать датасет", self)
+        # open_action.setShortcut(QtGui.QKeySequence("Ctrl+O"))
+        fin_action.triggered.connect(self.finalize)
+
         save_action = QAction("Сохранить", self)
         save_action.setShortcut(QtGui.QKeySequence("Ctrl+S"))
         save_action.triggered.connect(self.saveProject)
@@ -144,6 +148,7 @@ class SimpleMark(QMainWindow):
         file_menu.addAction(new_action)
         file_menu.addAction(open_action)
         file_menu.addAction(save_action)
+        file_menu.addAction(fin_action)
         file_menu.addAction(exit_action)
         edit_menu.addAction(undo_action)
         edit_menu.addAction(redo_action)
@@ -310,6 +315,10 @@ class SimpleMark(QMainWindow):
             )
             self.layout().addWidget(mark)
             self.marks.append(mark)
+
+    def finalize(self):
+        self.saveProject()
+        self.saver.saveDataset(self.frame_path)
 
     def getPointsList(self):
         res = []
