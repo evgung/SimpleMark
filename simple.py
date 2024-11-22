@@ -233,7 +233,7 @@ class SimpleMark(QMainWindow):
         init_work_window = InitWorkWindow()
         init_work_window.exec()
         if init_work_window.is_initialized:
-            self.video_path = init_work_window.path_to_video[0]
+            self.video_path = init_work_window.path_to_video
             self.saves_path = os.path.join(init_work_window.path_to_save, init_work_window.name_of_save_folder)
             self.save_width = init_work_window.save_width
             self.result_width = init_work_window.result_width
@@ -302,7 +302,12 @@ class SimpleMark(QMainWindow):
         l = self.loader.getFramePoints(number)
         print(l)
         for point in l:
-            mark = Mark(point.x * self.image_window.width() + self.image_window.x(), point.y * self.image_window.height() + self.image_window.y(), point.width, len(self.marks))
+            mark = Mark(
+                int(point.x * self.image_window.width() + self.image_window.x()),
+                int(point.y * self.image_window.height() + self.image_window.y()),
+                point.width,
+                len(self.marks)
+            )
             self.layout().addWidget(mark)
             self.marks.append(mark)
 
@@ -310,7 +315,11 @@ class SimpleMark(QMainWindow):
         res = []
         for mark in self.marks:
             if mark.is_enabled:
-                res.append(Point((mark.pos_x - self.image_window.x()) / self.image_window.width(), (mark.pos_y - self.image_window.y()) / self.image_window.height(), mark.width()))
+                res.append(Point(
+                    (mark.pos_x - self.image_window.x()) / self.image_window.width(),
+                    (mark.pos_y - self.image_window.y()) / self.image_window.height(),
+                    mark.width())
+                )
                 print(str(mark.pos_x) + "   " + str(mark.x()))
         return res
 

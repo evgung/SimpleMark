@@ -1,3 +1,5 @@
+import os
+
 import styles
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import Qt
@@ -46,12 +48,16 @@ class InitWorkWindow(QDialog):
 
     def selectVideo(self):
         fd = QtWidgets.QFileDialog()
-        self.path_to_video = fd.getOpenFileName(self, 'Выбрать видео', filter='Видео MP4 (*.mp4)')
-        self.label_way_to_video_selection.setText(self.path_to_video[0])
+        # Сразу хранит только путь
+        self.path_to_video = fd.getOpenFileName(self, 'Выбрать видео', filter='Видео MP4 (*.mp4)')[0]
+        # Тут получались разные разделители, поэтому надо нормализовать путь
+        self.path_to_video = os.path.normpath(self.path_to_video)
+        self.label_way_to_video_selection.setText(self.path_to_video)
 
     def selectFolder(self):
         fd = QtWidgets.QFileDialog()
         self.path_to_save = fd.getExistingDirectory(self, 'Выбрать папку')
+        self.path_to_save = os.path.normpath(self.path_to_save)
         print(self.path_to_save)
         self.label_way_to_save_selection.setText(self.path_to_save)
 

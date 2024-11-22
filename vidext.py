@@ -27,10 +27,7 @@ class VideoFrameExtractor:
             raise ValueError(f"Видео открыть не удалось»: {self.video_file}")
 
     def getVideoName(self, path):
-        pos = len(path) - 1
-        while path[pos] != '/':
-            pos -= 1
-        return path[(pos + 1):]
+        return os.path.basename(path)
 
     def getInfo(self):
         vid_name = self.getVideoName(self.video_file).split('.')[0]
