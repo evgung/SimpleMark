@@ -11,12 +11,12 @@ def unre_inf():
 
 class Mark(QLabel):
 
-    def __init__(self, pos_x, pos_y, size, number):
+    def __init__(self, pos_x, pos_y, size, number, comp_value=1):
         super().__init__()
         self.setStyleSheet("border: 1px solid red; background-color: rgba(255, 0, 0, 50)")
         self.size = size
-        self.move(pos_x - size // 2, pos_y - size // 2)
-        self.resize(self.size, self.size)
+        self.move(pos_x - (size * comp_value) // 2, pos_y - (size * comp_value) // 2)
+        self.resize(self.size * comp_value, self.size * comp_value)
 
         self.number = number
         self.pos_x = pos_x  # позиция в окне

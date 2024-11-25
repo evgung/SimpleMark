@@ -17,7 +17,7 @@ from starting import InitWorkWindow, OpenOld
 from vidext import VideoFrameExtractor
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QMainWindow, QLabel, QLineEdit, QMenuBar
+from PyQt5.QtWidgets import QMainWindow, QLabel, QLineEdit, QMenuBar, QPushButton
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtCore import Qt
 
@@ -58,6 +58,11 @@ class SimpleMark(QMainWindow):
 
         self.saver = Saver("")
         self.loader = Loader("")
+        self.markWidth = 30
+        self.markWidthBox = QLineEdit(self)
+        self.moreWidButton = QPushButton(self)
+        self.lessWidButton = QPushButton(self)
+        self.compressioValue = 1
 
         self.initUI()
 
@@ -114,6 +119,21 @@ class SimpleMark(QMainWindow):
         btn_num_image.setText("Перейти")
         btn_num_image.clicked.connect(self.clickToNumber)
 
+        self.markWidthBox.resize(0.7 * button_size, 40)
+        self.markWidthBox.move(self.back_width + self.fr_disp_x + 5, 2 * button_size + self.fr_disp_y + 93)
+        self.markWidthBox.setText('30')
+        self.markWidthBox.setAlignment(Qt.AlignCenter)
+        self.markWidthBox.setPlaceholderText("Ширина")
+        self.markWidthBox.setValidator(int_validator)
+        self.markWidthBox.setMaxLength(3)
+
+        self.moreWidButton.resize(0.25 * button_size, 16)
+        self.moreWidButton.move(self.back_width + self.fr_disp_x + 5 + 0.75 * button_size, 2 * button_size + self.fr_disp_y + 93)
+        self.moreWidButton.clicked.connect(self.addWidth)
+        self.lessWidButton.resize(0.25 * button_size, 16)
+        self.lessWidButton.move(self.back_width + self.fr_disp_x + 5 + 0.75 * button_size, 2 * button_size + self.fr_disp_y + 117)
+        self.lessWidButton.clicked.connect(self.takeWidth)
+
         menu_bar = QMenuBar(self)
         file_menu = menu_bar.addMenu("     Файл     ")
         edit_menu = menu_bar.addMenu("     Правка     ")
@@ -156,6 +176,11 @@ class SimpleMark(QMainWindow):
 
         self.setFocus()
 
+    def addWidth(self):
+        self.markWidthBox.setText(str(int(self.markWidthBox.text()) + 2))
+
+    def takeWidth(self):
+        self.markWidthBox.setText(str(int(self.markWidthBox.text()) - 2))
     # endregion
 
     # region События
@@ -186,8 +211,10 @@ class SimpleMark(QMainWindow):
         mult_y = self.back_height / image.height()
         if mult_x > mult_y:
             self.image_window.setFixedSize(int(image.width() * mult_y), int(image.height() * mult_y))
+            self.compressioValue = mult_y
         else:
             self.image_window.setFixedSize(int(image.width() * mult_x), int(image.height() * mult_x))
+            self.compressioValue = mult_x
         self.image_window.setPixmap(image)
         if mult_x > mult_y:
             image_window_width = int((self.back_width - self.image_window.width()) / 2 + self.fr_disp_x)
@@ -327,7 +354,7 @@ class SimpleMark(QMainWindow):
                 res.append(Point(
                     (mark.pos_x - self.image_window.x()) / self.image_window.width(),
                     (mark.pos_y - self.image_window.y()) / self.image_window.height(),
-                    mark.width())
+                    mark.size)
                 )
                 print(str(mark.pos_x) + "   " + str(mark.x()))
         return res
@@ -354,17 +381,16 @@ class SimpleMark(QMainWindow):
     # # Всё, что происходит в момент нажатия на поле
     def onClickImage(self):
         # обязательно нормализуем, картинка сжата
-        norm_x = mouse_position_in_image_window.x() / self.image_window.width()
-        norm_y = mouse_position_in_image_window.y() / self.image_window.height()
+        self.markWidth = int(self.markWidthBox.text())
 
         mark = Mark(
             mouse_position_in_image_window.x() + self.image_window.x(),
             mouse_position_in_image_window.y() + self.image_window.y(),
-            30,
-            len(self.marks)
+            self.markWidth,
+            len(self.marks),
+            self.compressioValue
         )
 
         self.layout().addWidget(mark)
         self.marks.append(mark)
         undo_stack.append(len(self.marks) - 1)
-        print("x:", norm_x, "\b,  y: ", norm_y)
