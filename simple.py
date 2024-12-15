@@ -37,7 +37,7 @@ class SimpleMark(QMainWindow):
         self.fr_disp_y = 30
 
         # # Полезные вам параметры (новые параметры добавлять сюда же)
-        # self.image_list = []  # список изображений # НЕ АКТУАЛЬНО
+        # self.image_list = [] # список изображений # НЕ АКТУАЛЬНО
         self.video_path = ""  # путь к видео
         self.saves_path = ""  # путь сохранения
         self.vfe = 0  # экстрактор видео
@@ -62,7 +62,7 @@ class SimpleMark(QMainWindow):
         self.markWidthBox = QLineEdit(self)
         self.moreWidButton = QPushButton(self)
         self.lessWidButton = QPushButton(self)
-        self.compressioValue = 1
+        self.compressionValue = 1
 
         self.initUI()
 
@@ -199,6 +199,10 @@ class SimpleMark(QMainWindow):
             self.toPreviousImage()
         if event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
             self.toNextImage()
+        if event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
+            self.addWidth()
+        if event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
+            self.takeWidth()
 
     def mouseReleaseEvent(self, event):
         self.setFocus()
@@ -219,10 +223,10 @@ class SimpleMark(QMainWindow):
         mult_y = self.back_height / image.height()
         if mult_x > mult_y:
             self.image_window.setFixedSize(int(image.width() * mult_y), int(image.height() * mult_y))
-            self.compressioValue = mult_y
+            self.compressionValue = mult_y
         else:
             self.image_window.setFixedSize(int(image.width() * mult_x), int(image.height() * mult_x))
-            self.compressioValue = mult_x
+            self.compressionValue = mult_x
         self.image_window.setPixmap(image)
         if mult_x > mult_y:
             image_window_width = int((self.back_width - self.image_window.width()) / 2 + self.fr_disp_x)
@@ -256,6 +260,7 @@ class SimpleMark(QMainWindow):
                 element.deleteLater()
             self.marks.clear()
             self.loadThis(number)
+            self.to_num_image.setText(str(number))
             return True
         else:
             caution.sendError("Переход на изображение невозможен")
@@ -305,15 +310,7 @@ class SimpleMark(QMainWindow):
     def getImage(self, path):
         return QPixmap(path)
 
-    # # # Ваша часть(или честь, если хотите)
-
-    # # Инициализация работы, заполнение массива и других переменных
-    #def initWork(self, frames_per_second, frames_edit_amount):
-        # Здесь frames_per_second - количество кадров в секунду
-        # Тут frames_edit_amount - количество кадров размечаемых за заход
-        # Неправильно будет хранить в памяти 10000 QPixmap-ов
-        #pass
-
+    # # # Ваша часть
 
     # # Открытие старого проекта
     def openOldProject(self):
@@ -340,13 +337,13 @@ class SimpleMark(QMainWindow):
 
     def loadThis(self, number):
         l = self.loader.getFramePoints(number)
-        print(l)
         for point in l:
             mark = Mark(
                 int(point.x * self.image_window.width() + self.image_window.x()),
                 int(point.y * self.image_window.height() + self.image_window.y()),
                 point.width,
-                len(self.marks)
+                len(self.marks),
+                self.compressionValue
             )
             self.layout().addWidget(mark)
             self.marks.append(mark)
@@ -396,8 +393,17 @@ class SimpleMark(QMainWindow):
             mouse_position_in_image_window.y() + self.image_window.y(),
             self.markWidth,
             len(self.marks),
-            self.compressioValue
+            self.compressionValue
         )
+
+        if mark.x() < self.image_window.x():
+            mark.setPosX(self.image_window.x() + mark.width() // 2 + 1)
+        if mark.y() < self.image_window.y():
+            mark.setPosY(self.image_window.y() + mark.height() // 2 + 1)
+        if mark.x() + mark.width() > self.image_window.width() + self.image_window.x():
+            mark.setPosX(self.image_window.width() + self.image_window.x() - mark.width() // 2 - 1)
+        if mark.y() + mark.height() > self.image_window.height() + self.image_window.y():
+            mark.setPosY(self.image_window.height() + self.image_window.y() - mark.height() // 2 - 1)
 
         self.layout().addWidget(mark)
         self.marks.append(mark)

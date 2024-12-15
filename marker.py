@@ -23,6 +23,14 @@ class Mark(QLabel):
         self.pos_y = pos_y  # она не нормализована
         self.is_enabled = True
 
+    def setPosX(self, pos_x):
+        self.pos_x = pos_x
+        self.move(self.pos_x - self.width() // 2, self.pos_y - self.height() // 2)
+
+    def setPosY(self, pos_y):
+        self.pos_y = pos_y
+        self.move(self.pos_x - self.width() // 2, self.pos_y - self.height() // 2)
+
     def mousePressEvent(self, ev):
         if ev.button() == 2:
             self.setVisible(False)

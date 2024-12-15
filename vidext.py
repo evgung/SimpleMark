@@ -43,27 +43,24 @@ class VideoFrameExtractor:
         last_time = 0
         while True:
             ok_flag, frame = self.camera.read()
-            if time.time() - last_time >= self.cooldown:
-                if ok_flag:
-                    file_name = ""
-                    if not self.save_width:
-                        d_width = self.frame_width / frame.shape[1]
-                        frame_resized = cv2.resize(frame, None, fx=d_width, fy=d_width)
-                        file_name = os.path.join(self.output_dir, f"{vid_name}_{str(self.frame_counter)}.png")
-                        cv2.imwrite(file_name, frame_resized)
-
-                    else:
-                        file_name = os.path.join(self.output_dir, f"{vid_name}_{str(self.frame_counter)}.png")
-                        cv2.imwrite(file_name, frame)
-
-                    if not self.save_width:
-                        cv2.imshow('Video', frame_resized)
-                    else:
-                        cv2.imshow('Video', frame)
-                    self.frame_counter += 1
-                    last_time = time.time()
+            if time.time() - last_time >= self.cooldown and ok_flag:
+                file_name = ""
+                if not self.save_width:
+                    d_width = self.frame_width / frame.shape[1]
+                    frame_resized = cv2.resize(frame, None, fx=d_width, fy=d_width)
+                    file_name = os.path.join(self.output_dir, f"{vid_name}_{str(self.frame_counter)}.png")
+                    cv2.imwrite(file_name, frame_resized)
                 else:
-                    break
+                    file_name = os.path.join(self.output_dir, f"{vid_name}_{str(self.frame_counter)}.png")
+                    cv2.imwrite(file_name, frame)
+                if not self.save_width:
+                    cv2.imshow('Video', frame_resized)
+                else:
+                    cv2.imshow('Video', frame)
+                self.frame_counter += 1
+                last_time = time.time()
+            elif not ok_flag:
+                break
             if cv2.waitKey(1) == ord('q'):
                 break
 
