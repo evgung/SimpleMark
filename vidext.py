@@ -11,7 +11,9 @@ class VideoFrameExtractor:
         self.frame_counter = 0
         self.camera = None
 
-        self.cooldown = 1 / fps  # период сохранения кадров (в секундах)
+        self.fps = fps      # желаемый fps
+        self.video_fps = 0  # реальный fps видео
+        # self.cooldown = 1 / fps  # период сохранения кадров (в секундах)
         self.save_width = save_width  # использовать исходную ширину? (bool)
         self.fp = ""
         self.fn = ""
@@ -23,6 +25,7 @@ class VideoFrameExtractor:
 
     def open_video(self):
         self.camera = cv2.VideoCapture(self.video_file)
+        self.video_fps = self.camera.get(cv2.CAP_PROP_FPS)
         if not self.camera.isOpened():
             raise ValueError(f"Видео открыть не удалось»: {self.video_file}")
 
@@ -39,28 +42,39 @@ class VideoFrameExtractor:
         self.create_output_directory()
         self.open_video()
 
+        # Рассчитываем интервал между сохранением кадров
+        save_interval = int(self.video_fps / self.fps)  # Интервал в кадрах
+
         vid_name = self.getVideoName(self.video_file).split('.')[0]
-        last_time = 0
+        frame_counter = 0
+        save_counter = 0
+
         while True:
             ok_flag, frame = self.camera.read()
-            if time.time() - last_time >= self.cooldown and ok_flag:
+            if not ok_flag:
+                break
+
+            # Сохраняем кадр, если он попадает в интервал
+            if frame_counter % save_interval == 0:
                 file_name = ""
                 if not self.save_width:
                     d_width = self.frame_width / frame.shape[1]
                     frame_resized = cv2.resize(frame, None, fx=d_width, fy=d_width)
-                    file_name = os.path.join(self.output_dir, f"{vid_name}_{str(self.frame_counter)}.png")
+                    file_name = os.path.join(self.output_dir, f"{vid_name}_{str(save_counter)}.png")
                     cv2.imwrite(file_name, frame_resized)
                 else:
-                    file_name = os.path.join(self.output_dir, f"{vid_name}_{str(self.frame_counter)}.png")
+                    file_name = os.path.join(self.output_dir, f"{vid_name}_{str(save_counter)}.png")
                     cv2.imwrite(file_name, frame)
+
                 if not self.save_width:
                     cv2.imshow('Video', frame_resized)
                 else:
                     cv2.imshow('Video', frame)
-                self.frame_counter += 1
-                last_time = time.time()
-            elif not ok_flag:
-                break
+
+                save_counter += 1
+
+            frame_counter += 1
+
             if cv2.waitKey(1) == ord('q'):
                 break
 
