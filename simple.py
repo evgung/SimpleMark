@@ -125,7 +125,7 @@ class SimpleMark(QMainWindow):
         lblWidth.setText('Ширина разметки')
         lblWidth.setAlignment(Qt.AlignCenter)
 
-        self.markWidthBox.resize(0.7 * button_size, 40)
+        self.markWidthBox.resize(int(0.7 * button_size), 40)
         self.markWidthBox.move(self.back_width + self.fr_disp_x + 5, 2 * button_size + self.fr_disp_y + 138)
         self.markWidthBox.setText('30')
         self.markWidthBox.setAlignment(Qt.AlignCenter)
@@ -133,12 +133,18 @@ class SimpleMark(QMainWindow):
         self.markWidthBox.setValidator(int_validator)
         self.markWidthBox.setMaxLength(3)
 
-        self.moreWidButton.resize(0.25 * button_size, 19)
-        self.moreWidButton.move(self.back_width + self.fr_disp_x + 5 + 0.75 * button_size, 2 * button_size + self.fr_disp_y + 138)
+        self.moreWidButton.resize(int(0.25 * button_size), 19)
+        self.moreWidButton.move(
+            int(self.back_width + self.fr_disp_x + 5 + 0.75 * button_size),
+            int(2 * button_size + self.fr_disp_y + 138)
+        )
         self.moreWidButton.clicked.connect(self.addWidth)
         self.moreWidButton.setIcon(QtGui.QIcon("Images/more.png"))
-        self.lessWidButton.resize(0.25 * button_size, 19)
-        self.lessWidButton.move(self.back_width + self.fr_disp_x + 5 + 0.75 * button_size, 2 * button_size + self.fr_disp_y + 158)
+        self.lessWidButton.resize(int(0.25 * button_size), 19)
+        self.lessWidButton.move(
+            int(self.back_width + self.fr_disp_x + 5 + 0.75 * button_size),
+            int(2 * button_size + self.fr_disp_y + 158)
+        )
         self.lessWidButton.clicked.connect(self.takeWidth)
         self.lessWidButton.setIcon(QtGui.QIcon("Images/less.png"))
 
