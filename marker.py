@@ -4,10 +4,12 @@ from PyQt5.QtWidgets import QLabel
 undo_stack = []
 redo_stack = []
 
+
 def unre_inf():
     print("---------------")
     print("undo: ", undo_stack)
     print("redo: ", redo_stack)
+
 
 class Mark(QLabel):
 
@@ -15,8 +17,11 @@ class Mark(QLabel):
         super().__init__()
         self.setStyleSheet("border: 1px solid red; background-color: rgba(255, 0, 0, 50)")
         self.size = size
-        self.move(pos_x - (size * comp_value) // 2, pos_y - (size * comp_value) // 2)
-        self.resize(self.size * comp_value, self.size * comp_value)
+        self.moveTo(pos_x, pos_y, size * comp_value, size * comp_value)
+        self.resize(
+            int(self.size * comp_value),
+            int(self.size * comp_value)
+        )
 
         self.number = number
         self.pos_x = pos_x  # позиция в окне
@@ -25,11 +30,17 @@ class Mark(QLabel):
 
     def setPosX(self, pos_x):
         self.pos_x = pos_x
-        self.move(self.pos_x - self.width() // 2, self.pos_y - self.height() // 2)
+        self.moveTo(self.pos_x, self.pos_y, self.width(), self.height())
 
     def setPosY(self, pos_y):
         self.pos_y = pos_y
-        self.move(self.pos_x - self.width() // 2, self.pos_y - self.height() // 2)
+        self.moveTo(self.pos_x, self.pos_y, self.width(), self.height())
+
+    def moveTo(self, x, y, width, height):
+        self.move(
+            int(x - width // 2),
+            int(y - height // 2)
+        )
 
     def mousePressEvent(self, ev):
         if ev.button() == 2:

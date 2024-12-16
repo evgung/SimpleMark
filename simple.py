@@ -37,7 +37,6 @@ class SimpleMark(QMainWindow):
         self.fr_disp_y = 30
 
         # # Полезные вам параметры (новые параметры добавлять сюда же)
-        # self.image_list = [] # список изображений # НЕ АКТУАЛЬНО
         self.video_path = ""  # путь к видео
         self.saves_path = ""  # путь сохранения
         self.vfe = 0  # экстрактор видео

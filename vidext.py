@@ -3,6 +3,7 @@ import os
 import cv2
 import time
 
+
 class VideoFrameExtractor:
     def __init__(self, video_file, output_dir="frames2", fps=10, save_width=True, frame_width=800):
         self.video_file = video_file
@@ -13,7 +14,6 @@ class VideoFrameExtractor:
 
         self.fps = fps      # желаемый fps
         self.video_fps = 0  # реальный fps видео
-        # self.cooldown = 1 / fps  # период сохранения кадров (в секундах)
         self.save_width = save_width  # использовать исходную ширину? (bool)
         self.fp = ""
         self.fn = ""
@@ -56,20 +56,14 @@ class VideoFrameExtractor:
 
             # Сохраняем кадр, если он попадает в интервал
             if frame_counter % save_interval == 0:
-                file_name = ""
                 if not self.save_width:
                     d_width = self.frame_width / frame.shape[1]
-                    frame_resized = cv2.resize(frame, None, fx=d_width, fy=d_width)
-                    file_name = os.path.join(self.output_dir, f"{vid_name}_{str(save_counter)}.png")
-                    cv2.imwrite(file_name, frame_resized)
-                else:
-                    file_name = os.path.join(self.output_dir, f"{vid_name}_{str(save_counter)}.png")
-                    cv2.imwrite(file_name, frame)
+                    frame = cv2.resize(frame, None, fx=d_width, fy=d_width)
 
-                if not self.save_width:
-                    cv2.imshow('Video', frame_resized)
-                else:
-                    cv2.imshow('Video', frame)
+                file_name = os.path.join(self.output_dir, f"{vid_name}_{str(save_counter)}.png")
+                is_success, im_buf_arr = cv2.imencode(".png", frame)
+                im_buf_arr.tofile(file_name)
+                cv2.imshow('Video', frame)
 
                 save_counter += 1
 

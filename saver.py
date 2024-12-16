@@ -1,6 +1,7 @@
 import os
 import pickle
 import cv2
+import numpy as np
 
 
 class Saver:
@@ -45,7 +46,7 @@ class Saver:
                 with open(os.path.join(path_name, frame_number), 'rb') as info_file:
                     points = pickle.load(info_file)
                     frame_path = frames_mask_with_path + str(frame_number) + '.png'
-                    frame = cv2.imread(frame_path)
+                    frame = cv2.imdecode(np.fromfile(frame_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
 
                     for point in points:
                         self.savePointFromFrame(point, frame, i)
@@ -62,4 +63,5 @@ class Saver:
 
         cropped_image = frame[y - half:y + half, x - half:x + half]
         result_name = os.path.join(self.dataset_path, str(image_number) + '.png')
-        cv2.imwrite(result_name, cropped_image)
+        is_success, im_buf_arr = cv2.imencode(".png", cropped_image)
+        im_buf_arr.tofile(result_name)
