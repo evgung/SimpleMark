@@ -8,9 +8,11 @@ class Saver:
 
     def __init__(self, project_path):
         self.project_path = project_path
+        self.project_name = os.path.basename(project_path)
         self.config_file = os.path.join(project_path, "config.pkl")
         self.info_path = os.path.join(project_path, "info")
         self.dataset_path = os.path.join(project_path, "dataset")
+
         os.makedirs(self.info_path, exist_ok=True)
         os.makedirs(self.dataset_path, exist_ok=True)
 
@@ -38,21 +40,21 @@ class Saver:
             with open(info_file, 'wb') as frame_file:
                 pickle.dump(points, frame_file)
 
-    def saveDataset(self, frames_mask_with_path):
-        i = 0
+    def saveDataset(self, frames_path_mask):
         for path_name, dirs, file_names in os.walk(self.info_path):
             for frame_number in file_names:
 
                 with open(os.path.join(path_name, frame_number), 'rb') as info_file:
                     points = pickle.load(info_file)
-                    frame_path = frames_mask_with_path + str(frame_number) + '.png'
+                    frame_path = f'{frames_path_mask}{frame_number}.png'
                     frame = cv2.imdecode(np.fromfile(frame_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+                    image_number = 0
 
                     for point in points:
-                        self.savePointFromFrame(point, frame, i)
-                        i += 1
+                        self.savePointFromFrame(point, frame, frame_number, image_number)
+                        image_number += 1
 
-    def savePointFromFrame(self, point, frame, image_number):
+    def savePointFromFrame(self, point, frame, frame_number, image_number):
         if frame is None:
             return
 
@@ -62,6 +64,7 @@ class Saver:
         half = point.width // 2
 
         cropped_image = frame[y - half:y + half, x - half:x + half]
-        result_name = os.path.join(self.dataset_path, str(image_number) + '.png')
+        result_name = f'{self.project_name}_{frame_number}_{image_number}.png'
+        result_path = os.path.join(self.dataset_path, result_name)
         is_success, im_buf_arr = cv2.imencode(".png", cropped_image)
-        im_buf_arr.tofile(result_name)
+        im_buf_arr.tofile(result_path)
