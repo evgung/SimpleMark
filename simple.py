@@ -63,6 +63,9 @@ class SimpleMark(QMainWindow):
         self.lessWidButton = QPushButton(self)
         self.compressionValue = 1
 
+        # количество кадров
+        self.number_box = QLabel(self)
+
         self.initUI()
 
     def initUI(self):
@@ -83,9 +86,11 @@ class SimpleMark(QMainWindow):
         background_label.move(self.fr_disp_x, self.fr_disp_y)
         background_label.setFixedSize(self.back_width, self.back_height)
         background_label.setFrameShape(QtWidgets.QFrame.Box)
-        self.image_window = ClickableLabel(self)
+        background_label.setStyleSheet("border: none;")
+        self.image_window = ClickableLabel()
         self.image_window.setScaledContents(True)
         self.image_window.clicked.connect(self.onClickImage)
+        self.image_window.setStyleSheet("border: 1px dashed black;")
 
         # кнопочки влево/вправо
         button_size = screen_width - self.fr_disp_x - 10 - self.back_width
@@ -96,6 +101,11 @@ class SimpleMark(QMainWindow):
         previous_button.move(self.back_width + self.fr_disp_x + 5, self.fr_disp_y - 1)
         previous_button.clicked.connect(self.toPreviousImage)
         previous_button.setShortcut(224)
+
+        self.number_box.move(self.back_width + self.fr_disp_x + 5, self.height() - 100)
+        self.number_box.resize(button_size, 40)
+        self.number_box.setAlignment(Qt.AlignCenter)
+        self.number_box.setStyleSheet("font-family: 'arial'; font-size: 18px; color: grey; border: none;")
 
         next_button = UnfocusedButton(self)
         next_button.resize(button_size, button_size)
@@ -265,7 +275,7 @@ class SimpleMark(QMainWindow):
                 element.deleteLater()
             self.marks.clear()
             self.loadThis(number)
-            self.to_num_image.setText(str(number))
+            self.number_box.setText('№ ' + str(number))
             return True
         else:
             caution.sendError("Переход на изображение невозможен")
@@ -295,7 +305,9 @@ class SimpleMark(QMainWindow):
             additional_thread = Thread(target=self.vfe.extract_frames)
             additional_thread.start()
             time.sleep(1 / self.frames_per_second + 2)
+            self.layout().addWidget(self.image_window)
             self.toImageByNumber(0)
+            self.saveProject()
 
     # # Предупреждает о возможной потере данных
     def warn(self):
@@ -328,6 +340,7 @@ class SimpleMark(QMainWindow):
             self.frames_per_second = inf['fps']
             self.frame_name = inf['image_name']
             self.frame_path = inf['image_path']
+            self.layout().addWidget(self.image_window)
             self.toImageByNumber(inf['last_frame_number'])
 
     # # Сохранение проекта
@@ -366,7 +379,6 @@ class SimpleMark(QMainWindow):
                     (mark.pos_y - self.image_window.y()) / self.image_window.height(),
                     mark.size)
                 )
-                print(str(mark.pos_x) + "   " + str(mark.x()))
         return res
 
     # region Отмена/Возврат

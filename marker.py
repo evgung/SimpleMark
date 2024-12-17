@@ -5,12 +5,6 @@ undo_stack = []
 redo_stack = []
 
 
-def unre_inf():
-    print("---------------")
-    print("undo: ", undo_stack)
-    print("redo: ", redo_stack)
-
-
 class Mark(QLabel):
 
     def __init__(self, pos_x, pos_y, size, number, comp_value=1):
@@ -47,7 +41,6 @@ class Mark(QLabel):
             self.setVisible(False)
             self.is_enabled = False
             undo_stack.append(self.number)
-            unre_inf()
 
     def reflect(self):
         self.is_enabled = not self.is_enabled
