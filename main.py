@@ -26,4 +26,5 @@ if __name__ == '__main__':
     sm = SimpleMark()
     sm.setStyleSheet(styles.main_style)
     sm.showMaximized()
+    sm.setMarkColorRed()
     sys.exit(app.exec_())

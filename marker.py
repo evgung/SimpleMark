@@ -9,7 +9,6 @@ class Mark(QLabel):
 
     def __init__(self, pos_x, pos_y, size, number, comp_value=1):
         super().__init__()
-        self.setStyleSheet("border: 1px solid red; background-color: rgba(255, 0, 0, 50)")
         self.size = size
         self.moveTo(pos_x, pos_y, size * comp_value, size * comp_value)
         self.resize(

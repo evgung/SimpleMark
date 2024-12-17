@@ -160,6 +160,7 @@ class SimpleMark(QMainWindow):
         menu_bar = QMenuBar(self)
         file_menu = menu_bar.addMenu("     Файл     ")
         edit_menu = menu_bar.addMenu("     Правка     ")
+        color_menu = menu_bar.addMenu("     Цвет меток     ")
 
         new_action = QAction("Новый проект", self)
         new_action.setShortcut(QtGui.QKeySequence("Ctrl+N"))
@@ -188,6 +189,27 @@ class SimpleMark(QMainWindow):
         redo_action.setShortcut(QtGui.QKeySequence("Ctrl+Y"))
         redo_action.triggered.connect(self.redo)
 
+        setred_action = QAction("Красный", self)
+        setred_action.triggered.connect(self.setMarkColorRed)
+
+        setgreen_action = QAction("Зелёный", self)
+        setgreen_action.triggered.connect(self.setMarkColorGreen)
+
+        setyellow_action = QAction("Жёлтый", self)
+        setyellow_action.triggered.connect(self.setMarkColorYellow)
+
+        setblue_action = QAction("Синий", self)
+        setblue_action.triggered.connect(self.setMarkColorBlue)
+
+        setblack_action = QAction("Чёрный", self)
+        setblack_action.triggered.connect(self.setMarkColorBlack)
+
+        setwhite_action = QAction("Белый", self)
+        setwhite_action.triggered.connect(self.setMarkColorWhite)
+
+        setfuchsia_action = QAction("Фуксия", self)
+        setfuchsia_action.triggered.connect(self.setMarkColorFuchsia)
+
         file_menu.addAction(new_action)
         file_menu.addAction(open_action)
         file_menu.addAction(save_action)
@@ -195,6 +217,13 @@ class SimpleMark(QMainWindow):
         file_menu.addAction(exit_action)
         edit_menu.addAction(undo_action)
         edit_menu.addAction(redo_action)
+        color_menu.addAction(setred_action)
+        color_menu.addAction(setblue_action)
+        color_menu.addAction(setgreen_action)
+        color_menu.addAction(setyellow_action)
+        color_menu.addAction(setblack_action)
+        color_menu.addAction(setwhite_action)
+        color_menu.addAction(setfuchsia_action)
         menu_bar.adjustSize()
 
         self.setFocus()
@@ -285,6 +314,7 @@ class SimpleMark(QMainWindow):
     def clickToNumber(self):
         if self.to_num_image.text() != "":
             self.toImageByNumber(int(self.to_num_image.text()))
+        self.setFocus(True)
 
     # endregion
 
@@ -425,3 +455,24 @@ class SimpleMark(QMainWindow):
         self.layout().addWidget(mark)
         self.marks.append(mark)
         undo_stack.append(len(self.marks) - 1)
+
+    def setMarkColorGreen(self):
+        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid green;  background-color: rgba(0, 255, 0, 50)}")
+
+    def setMarkColorYellow(self):
+        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid yellow;  background-color: rgba(255, 255, 0, 50)}")
+
+    def setMarkColorBlue(self):
+        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid blue;  background-color: rgba(0, 0, 255, 50)}")
+
+    def setMarkColorRed(self):
+        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid red;  background-color: rgba(255, 0, 0, 50)}")
+
+    def setMarkColorBlack(self):
+        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid black;  background-color: rgba(0, 0, 0, 50)}")
+
+    def setMarkColorWhite(self):
+        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid white;  background-color: rgba(255, 255, 255, 50)}")
+
+    def setMarkColorFuchsia(self):
+        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid fuchsia;  background-color: rgba(255, 0, 255, 50)}")
