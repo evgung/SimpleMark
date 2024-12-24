@@ -16,14 +16,15 @@ class Saver:
         os.makedirs(self.info_path, exist_ok=True)
         os.makedirs(self.dataset_path, exist_ok=True)
 
-    def saveProject(self, last_frame_number, path_to_video, last_extracted_frame_number, fps, image_name, image_path):
+    def saveProject(self, last_frame_number, path_to_video, last_extracted_frame_number, fps, image_name, image_path, mark_width):
         properties = {
             "last_frame_number": last_frame_number,
             "path_to_video": path_to_video,
             "last_extracted_frame_number": last_extracted_frame_number,
             "fps": fps,
             "image_name": image_name,
-            "image_path": image_path
+            "image_path": image_path,
+            "mark_width": mark_width
         }
 
         with open(self.config_file, 'wb') as config:

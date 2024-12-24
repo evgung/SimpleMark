@@ -25,7 +25,6 @@ from PyQt5.QtCore import Qt
 class SimpleMark(QMainWindow):
 
     # region Инициализация
-
     def __init__(self):
         super().__init__()
         # # UI
@@ -86,7 +85,7 @@ class SimpleMark(QMainWindow):
         background_label.move(self.fr_disp_x, self.fr_disp_y)
         background_label.setFixedSize(self.back_width, self.back_height)
         background_label.setFrameShape(QtWidgets.QFrame.Box)
-        background_label.setStyleSheet("border: none;")
+        background_label.setStyleSheet("border: 1px solid black; background-color: white;")
         self.image_window = ClickableLabel()
         self.image_window.setScaledContents(True)
         self.image_window.clicked.connect(self.onClickImage)
@@ -136,7 +135,6 @@ class SimpleMark(QMainWindow):
 
         self.markWidthBox.resize(int(0.7 * button_size), 40)
         self.markWidthBox.move(self.back_width + self.fr_disp_x + 5, 2 * button_size + self.fr_disp_y + 138)
-        self.markWidthBox.setText('30')
         self.markWidthBox.setAlignment(Qt.AlignCenter)
         self.markWidthBox.setPlaceholderText("Ширина")
         self.markWidthBox.setValidator(int_validator)
@@ -190,25 +188,31 @@ class SimpleMark(QMainWindow):
         redo_action.triggered.connect(self.redo)
 
         setred_action = QAction("Красный", self)
-        setred_action.triggered.connect(self.setMarkColorRed)
+        setred_action.triggered.connect(lambda: self.setMarkColor(255, 0, 0))
 
         setgreen_action = QAction("Зелёный", self)
-        setgreen_action.triggered.connect(self.setMarkColorGreen)
+        setgreen_action.triggered.connect(lambda: self.setMarkColor(0, 255, 0))
 
         setyellow_action = QAction("Жёлтый", self)
-        setyellow_action.triggered.connect(self.setMarkColorYellow)
+        setyellow_action.triggered.connect(lambda: self.setMarkColor(255, 255, 0))
 
         setblue_action = QAction("Синий", self)
-        setblue_action.triggered.connect(self.setMarkColorBlue)
+        setblue_action.triggered.connect(lambda: self.setMarkColor(0, 0, 255))
 
         setblack_action = QAction("Чёрный", self)
-        setblack_action.triggered.connect(self.setMarkColorBlack)
+        setblack_action.triggered.connect(lambda: self.setMarkColor(0, 0, 0))
 
         setwhite_action = QAction("Белый", self)
-        setwhite_action.triggered.connect(self.setMarkColorWhite)
+        setwhite_action.triggered.connect(lambda: self.setMarkColor(255, 255, 255))
 
         setfuchsia_action = QAction("Фуксия", self)
-        setfuchsia_action.triggered.connect(self.setMarkColorFuchsia)
+        setfuchsia_action.triggered.connect(lambda: self.setMarkColor(255, 0, 255))
+
+        setaqua_action = QAction("Аква", self)
+        setaqua_action.triggered.connect(lambda: self.setMarkColor(0, 255, 255))
+
+        setspec_action = QAction("Выбрать...", self)
+        setspec_action.triggered.connect(self.selectColor)
 
         file_menu.addAction(new_action)
         file_menu.addAction(open_action)
@@ -224,6 +228,8 @@ class SimpleMark(QMainWindow):
         color_menu.addAction(setblack_action)
         color_menu.addAction(setwhite_action)
         color_menu.addAction(setfuchsia_action)
+        color_menu.addAction(setaqua_action)
+        color_menu.addAction(setspec_action)
         menu_bar.adjustSize()
 
         self.setFocus()
@@ -332,6 +338,7 @@ class SimpleMark(QMainWindow):
             self.frame_path, self.frame_name = self.vfe.getInfo()
             self.saver = Saver(self.saves_path)
             self.loader = Loader(self.saves_path)
+            self.markWidthBox.setText('30')
             additional_thread = Thread(target=self.vfe.extract_frames)
             additional_thread.start()
             time.sleep(1 / self.frames_per_second + 2)
@@ -370,6 +377,11 @@ class SimpleMark(QMainWindow):
             self.frames_per_second = inf['fps']
             self.frame_name = inf['image_name']
             self.frame_path = inf['image_path']
+            if 'mark_width' in inf.keys():
+                self.markWidth = inf['mark_width']
+            else:
+                self.markWidth = 30
+            self.markWidthBox.setText(str(self.markWidth))
             self.layout().addWidget(self.image_window)
             self.toImageByNumber(inf['last_frame_number'])
 
@@ -377,7 +389,7 @@ class SimpleMark(QMainWindow):
     def saveProject(self):
         self.saveThis()
         self.saver.saveProject(self.image_number, self.video_path, 0, self.frames_per_second,
-                               self.frame_name, self.frame_path)
+                               self.frame_name, self.frame_path, self.markWidth)
 
     def saveThis(self):
         k = self.getPointsList()
@@ -456,23 +468,12 @@ class SimpleMark(QMainWindow):
         self.marks.append(mark)
         undo_stack.append(len(self.marks) - 1)
 
-    def setMarkColorGreen(self):
-        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid green;  background-color: rgba(0, 255, 0, 50)}")
+    def setMarkColor(self, r, g, b):
+        style = (f"Mark {{ border: 1px solid rgb({r}, {g}, {b}); background-color: rgba({r}, {g}, {b}, 50)}} "
+                 f"Mark:hover {{background-color: rgba({r}, {g}, {b}, 100);}}")
+        self.setStyleSheet(styles.main_style + style)
 
-    def setMarkColorYellow(self):
-        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid yellow;  background-color: rgba(255, 255, 0, 50)}")
-
-    def setMarkColorBlue(self):
-        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid blue;  background-color: rgba(0, 0, 255, 50)}")
-
-    def setMarkColorRed(self):
-        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid red;  background-color: rgba(255, 0, 0, 50)}")
-
-    def setMarkColorBlack(self):
-        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid black;  background-color: rgba(0, 0, 0, 50)}")
-
-    def setMarkColorWhite(self):
-        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid white;  background-color: rgba(255, 255, 255, 50)}")
-
-    def setMarkColorFuchsia(self):
-        self.setStyleSheet(styles.main_style + "Mark {border: 1px solid fuchsia;  background-color: rgba(255, 0, 255, 50)}")
+    def selectColor(self):
+        color_d = QtWidgets.QColorDialog()
+        col = color_d.getColor()
+        self.setMarkColor(col.red(), col.green(), col.blue())
