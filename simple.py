@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import time
 import os
+from distutils.core import setup_keywords
+
 import pyautogui
 from threading import Thread
 from saver import Saver
@@ -10,13 +12,13 @@ from point import Point
 import marker
 import styles
 from addwid import ClickableLabel, UnfocusedButton, mouse_position_in_image_window
-from caution import WarningWindow
+from caution import WarningWindow, ErrorWindow
 from marker import Mark, undo_stack, redo_stack
 import caution
 from starting import InitWorkWindow, OpenOld
 from vidext import VideoFrameExtractor
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QInputEvent
 from PyQt5.QtWidgets import QMainWindow, QLabel, QLineEdit, QMenuBar, QPushButton
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtCore import Qt
@@ -159,6 +161,7 @@ class SimpleMark(QMainWindow):
         file_menu = menu_bar.addMenu("     Файл     ")
         edit_menu = menu_bar.addMenu("     Правка     ")
         color_menu = menu_bar.addMenu("     Цвет меток     ")
+        tools_menu = menu_bar.addMenu("     Инструменты     ")
 
         new_action = QAction("Новый проект", self)
         new_action.setShortcut(QtGui.QKeySequence("Ctrl+N"))
@@ -214,6 +217,9 @@ class SimpleMark(QMainWindow):
         setspec_action = QAction("Выбрать...", self)
         setspec_action.triggered.connect(self.selectColor)
 
+        change_action = QAction("Выравнивание размера", self)
+        change_action.triggered.connect(self.openMarkSizeField)
+
         file_menu.addAction(new_action)
         file_menu.addAction(open_action)
         file_menu.addAction(save_action)
@@ -230,6 +236,7 @@ class SimpleMark(QMainWindow):
         color_menu.addAction(setfuchsia_action)
         color_menu.addAction(setaqua_action)
         color_menu.addAction(setspec_action)
+        tools_menu.addAction(change_action)
         menu_bar.adjustSize()
 
         self.setFocus()
@@ -345,6 +352,7 @@ class SimpleMark(QMainWindow):
             self.layout().addWidget(self.image_window)
             self.toImageByNumber(0)
             self.saveProject()
+        init_work_window.deleteLater()
 
     # # Предупреждает о возможной потере данных
     def warn(self):
@@ -352,10 +360,13 @@ class SimpleMark(QMainWindow):
         ww.exec()
         if ww.save_option:
             self.saveProject()
+            ww.deleteLater()
             return True
         elif ww.pofig_option:
             self.close()
+            ww.deleteLater()
             return True
+        ww.deleteLater()
         return False
 
     # # # Полезные для вас функции
@@ -392,15 +403,16 @@ class SimpleMark(QMainWindow):
                                self.frame_name, self.frame_path, self.markWidth)
 
     def saveThis(self):
-        k = self.getPointsList()
         self.saver.saveFramePoints(self.image_number, self.getPointsList())
 
     def loadThis(self, number):
         l = self.loader.getFramePoints(number)
         for point in l:
             mark = Mark(
-                int(point.x * self.image_window.width() + self.image_window.x()),
-                int(point.y * self.image_window.height() + self.image_window.y()),
+                int(self.image_window.x()),
+                int(self.image_window.y()),
+                int(point.x * self.image_window.width()),
+                int(point.y * self.image_window.height()),
                 point.width,
                 len(self.marks),
                 self.compressionValue
@@ -417,10 +429,9 @@ class SimpleMark(QMainWindow):
         for mark in self.marks:
             if mark.is_enabled:
                 res.append(Point(
-                    (mark.pos_x - self.image_window.x()) / self.image_window.width(),
-                    (mark.pos_y - self.image_window.y()) / self.image_window.height(),
-                    mark.size)
-                )
+                    mark.win_x / self.image_window.width(),
+                    mark.win_y / self.image_window.height(),
+                    mark.size))
         return res
 
     # region Отмена/Возврат
@@ -444,29 +455,34 @@ class SimpleMark(QMainWindow):
     # # Нажатие на область рисунка (да только рисунка не рамки, можно и рамки сделать только смысла нет)
     # # Всё, что происходит в момент нажатия на поле
     def onClickImage(self):
-        # обязательно нормализуем, картинка сжата
         self.markWidth = int(self.markWidthBox.text())
 
-        mark = Mark(
-            mouse_position_in_image_window.x() + self.image_window.x(),
-            mouse_position_in_image_window.y() + self.image_window.y(),
-            self.markWidth,
-            len(self.marks),
-            self.compressionValue
-        )
-
-        if mark.x() < self.image_window.x():
-            mark.setPosX(self.image_window.x() + mark.width() // 2 + 1)
-        if mark.y() < self.image_window.y():
-            mark.setPosY(self.image_window.y() + mark.height() // 2 + 1)
-        if mark.x() + mark.width() > self.image_window.width() + self.image_window.x():
-            mark.setPosX(self.image_window.width() + self.image_window.x() - mark.width() // 2 - 1)
-        if mark.y() + mark.height() > self.image_window.height() + self.image_window.y():
-            mark.setPosY(self.image_window.height() + self.image_window.y() - mark.height() // 2 - 1)
+        mark = self.setMark(mouse_position_in_image_window.x(),
+            mouse_position_in_image_window.y(), self.markWidth)
 
         self.layout().addWidget(mark)
         self.marks.append(mark)
         undo_stack.append(len(self.marks) - 1)
+
+    def setMark(self, x, y, wid):
+        mark = Mark(
+            self.image_window.x(),
+            self.image_window.y(),
+            x,
+            y,
+            wid,
+            len(self.marks),
+            self.compressionValue)
+
+        if mark.x() < self.image_window.x():
+            mark.setWinX(mark.width() // 2 + 1)
+        if mark.y() < self.image_window.y():
+            mark.setWinY(mark.height() // 2 + 1)
+        if mark.x() + mark.width() > self.image_window.width() + self.image_window.x():
+            mark.setWinX(self.image_window.width() - mark.width() // 2 - 1)
+        if mark.y() + mark.height() > self.image_window.height() + self.image_window.y():
+            mark.setWinY(self.image_window.height() - mark.height() // 2 - 1)
+        return mark
 
     def setMarkColor(self, r, g, b):
         style = (f"Mark {{ border: 1px solid rgb({r}, {g}, {b}); background-color: rgba({r}, {g}, {b}, 50)}} "
@@ -477,3 +493,37 @@ class SimpleMark(QMainWindow):
         color_d = QtWidgets.QColorDialog()
         col = color_d.getColor()
         self.setMarkColor(col.red(), col.green(), col.blue())
+
+    def openMarkSizeField(self):
+        field = QtWidgets.QInputDialog()
+        field.exec()
+        if (field.textValue().isdigit()):
+            self.changeAllMarksSizeTo(int(field.textValue()))
+        else:
+            error = ErrorWindow("Значение указано некорректно")
+            error.exec()
+            error.deleteLater()
+        field.deleteLater()
+
+    def changeAllMarksSizeTo(self, new_size):
+        self.saveThis()
+        for way, dir, frames in os.walk(os.path.join(self.saves_path, "info")):
+            for frame in frames:
+                points = self.loader.getFramePoints(frame)
+                res = []
+                for point in points:
+                    res.append(self.setMark(point.x * self.image_window.width(),
+                                            point.y * self.image_window.height(),
+                                            new_size))
+                pts = []
+                for r in res:
+                    pts.append(Point(r.win_x / self.image_window.width(), r.win_y / self.image_window.height(), new_size))
+                self.saver.saveFramePoints(frame, pts)
+                for mark in res:
+                    mark.deleteLater()
+        for i in range(len(self.marks)):
+            self.marks[i].setParent(None)
+            self.marks[i].deleteLater()
+        self.marks = []
+        self.loadThis(self.image_number)
+        self.markWidthBox.setText(str(new_size))
