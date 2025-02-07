@@ -28,7 +28,8 @@ class Loader:
                 "last_extracted_frame_number": None,
                 "fps": None,
                 "image_name": "",
-                "image_path": ""
+                "image_path": "",
+                "mark_width": 30
             }
 
     # Возвращает список объектов класса Point

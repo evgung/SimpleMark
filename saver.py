@@ -41,7 +41,7 @@ class Saver:
             with open(info_file, 'wb') as frame_file:
                 pickle.dump(points, frame_file)
 
-    def saveDataset(self, frames_path_mask):
+    def saveDataset(self, frames_path_mask, mark_width):
         for path_name, dirs, file_names in os.walk(self.info_path):
             for frame_number in file_names:
 
@@ -52,17 +52,17 @@ class Saver:
                     image_number = 0
 
                     for point in points:
-                        self.savePointFromFrame(point, frame, frame_number, image_number)
+                        self.savePointFromFrame(point, frame, frame_number, image_number, mark_width)
                         image_number += 1
 
-    def savePointFromFrame(self, point, frame, frame_number, image_number):
+    def savePointFromFrame(self, point, frame, frame_number, image_number, mark_width):
         if frame is None:
             return
 
         height, width = frame.shape[:2]
         x = int(point.x * width)
         y = int(point.y * height)
-        half = point.width // 2
+        half = mark_width // 2
 
         cropped_image = frame[y - half:y + half, x - half:x + half]
         result_name = f'{self.project_name}_{frame_number}_{image_number}.png'

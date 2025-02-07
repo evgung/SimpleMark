@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import os
-from distutils.core import setup_keywords
+#from distutils.core import setup_keywords
 
 import pyautogui
 from threading import Thread
@@ -52,9 +52,7 @@ class SimpleMark(QMainWindow):
         # # Переменные для получения изображений
         self.frame_path = ""  # путь к изображению с его названием (без номера)
         self.frame_name = ""  # общая часть названия изображения
-        # self.frames_amount = 0  # количество изображений
         self.image_number = -1  # номер текущего изображения
-        # таким образом имеем список изображений
 
         self.saver = Saver("")
         self.loader = Loader("")
@@ -388,10 +386,7 @@ class SimpleMark(QMainWindow):
             self.frames_per_second = inf['fps']
             self.frame_name = inf['image_name']
             self.frame_path = inf['image_path']
-            if 'mark_width' in inf.keys():
-                self.markWidth = inf['mark_width']
-            else:
-                self.markWidth = 30
+            self.markWidth = inf['mark_width']
             self.markWidthBox.setText(str(self.markWidth))
             self.layout().addWidget(self.image_window)
             self.toImageByNumber(inf['last_frame_number'])
@@ -413,7 +408,7 @@ class SimpleMark(QMainWindow):
                 int(self.image_window.y()),
                 int(point.x * self.image_window.width()),
                 int(point.y * self.image_window.height()),
-                point.width,
+                self.markWidth,
                 len(self.marks),
                 self.compressionValue
             )
@@ -422,7 +417,7 @@ class SimpleMark(QMainWindow):
 
     def finalize(self):
         self.saveProject()
-        self.saver.saveDataset(self.frame_path)
+        self.saver.saveDataset(self.frame_path, self.markWidth)
 
     def getPointsList(self):
         res = []
@@ -431,7 +426,7 @@ class SimpleMark(QMainWindow):
                 res.append(Point(
                     mark.win_x / self.image_window.width(),
                     mark.win_y / self.image_window.height(),
-                    mark.size))
+                    ))
         return res
 
     # region Отмена/Возврат
