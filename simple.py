@@ -447,3 +447,4 @@ class SimpleMark(QMainWindow):
         color_d = QtWidgets.QColorDialog()
         col = color_d.getColor()
         self.setMarkColor(col.red(), col.green(), col.blue())
+
