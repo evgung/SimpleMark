@@ -37,11 +37,70 @@ class InitWorkWindow(QDialog):
         self.box_change_to_width.setToolTip("Ширина полученных кадров")
         self.box_change_to_width.setAlignment(Qt.AlignCenter)
 
+        self.box_mark_width = QLineEdit()
+        self.box_mark_width.setValidator(int_validator)
+        self.box_mark_width.setToolTip("Ширина метки (нельзя изменить позже)")
+        self.box_mark_width.setText("30")
+        self.box_mark_width.setAlignment(Qt.AlignCenter)
+
         self.chbox_save_base_width = QtWidgets.QCheckBox("Сохранить исходную ширину")
         self.chbox_save_base_width.clicked.connect(self.reflectField)
 
         self.is_initialized = False
         self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Открыть")
+        self.resize(300, 300)
+
+        self.setStyleSheet(styles.dialog_style)
+
+        label_way_to_video = QLabel("Путь к видео")
+        label_way_to_save = QLabel("Путь к папке сохранения")
+
+        btn_select_video = QtWidgets.QPushButton("Выбор видео")
+        btn_select_video.setToolTip("Выбрать директорию с видео, кадры которого необходимо разметить")
+        btn_select_video.clicked.connect(self.selectVideo)
+        btn_select_video.adjustSize()
+
+        btn_select_save = QtWidgets.QPushButton("Выбор папки")
+        btn_select_save.setToolTip("Выбрать директорию, в которой необходимо создать папку с сохранениями")
+        btn_select_save.clicked.connect(self.selectFolder)
+        btn_select_save.adjustSize()
+
+        lbl_save_name = QLabel("Название папки сохранения")
+        lbl_amount_of_frames = QLabel("Количество кадров в секунду")
+        lbl_mark_width = QLabel("Ширина метки")
+        lbl_change_to_width = QLabel("               Сжать изображение до")
+
+        btn_cancel = QPushButton("Отмена")
+        btn_cancel.clicked.connect(self.cancel)
+        btn_cancel.adjustSize()
+        btn_confirm = QPushButton("ОК")
+        btn_confirm.clicked.connect(self.submit)
+        btn_confirm.adjustSize()
+
+        self.reflectField()
+
+        grid = QtWidgets.QGridLayout(self)
+        grid.setSpacing(20)
+        grid.addWidget(label_way_to_video, 1, 1)
+        grid.addWidget(self.label_way_to_video_selection, 1, 3)
+        grid.addWidget(btn_select_video, 1, 2)
+        grid.addWidget(label_way_to_save, 2, 1)
+        grid.addWidget(self.label_way_to_save_selection, 2, 3)
+        grid.addWidget(btn_select_save, 2, 2)
+        grid.addWidget(lbl_save_name, 3, 1)
+        grid.addWidget(self.box_save_name, 3, 2)
+        grid.addWidget(lbl_amount_of_frames, 4, 1)
+        grid.addWidget(self.box_amount_of_frames, 4, 2)
+        grid.addWidget(lbl_mark_width, 6, 1)
+        grid.addWidget(self.box_mark_width, 6, 2)
+        grid.addWidget(self.chbox_save_base_width, 7, 1)
+        grid.addWidget(lbl_change_to_width, 8, 1)
+        grid.addWidget(self.box_change_to_width, 8, 2)
+        grid.addWidget(btn_cancel, 9, 2)
+        grid.addWidget(btn_confirm, 9, 3)
 
     def reflectField(self):
         self.box_change_to_width.setDisabled(self.chbox_save_base_width.checkState())
@@ -79,56 +138,6 @@ class InitWorkWindow(QDialog):
 
     def cancel(self):
         self.close()
-
-    def initUI(self):
-        self.setWindowTitle("Открыть")
-        self.resize(300, 300)
-
-        self.setStyleSheet(styles.dialog_style)
-
-        label_way_to_video = QLabel("Путь к видео")
-        label_way_to_save = QLabel("Путь к папке сохранения")
-
-        btn_select_video = QtWidgets.QPushButton("Выбор видео")
-        btn_select_video.setToolTip("Выбрать директорию с видео, кадры которого необходимо разметить")
-        btn_select_video.clicked.connect(self.selectVideo)
-        btn_select_video.adjustSize()
-
-        btn_select_save = QtWidgets.QPushButton("Выбор папки")
-        btn_select_save.setToolTip("Выбрать директорию, в которой необходимо создать папку с сохранениями")
-        btn_select_save.clicked.connect(self.selectFolder)
-        btn_select_save.adjustSize()
-
-        lbl_save_name = QLabel("Название папки сохранения")
-        lbl_amount_of_frames = QLabel("Количество кадров в секунду")
-        lbl_change_to_width = QLabel("               Сжать изображение до")
-
-        btn_cancel = QPushButton("Отмена")
-        btn_cancel.clicked.connect(self.cancel)
-        btn_cancel.adjustSize()
-        btn_confirm = QPushButton("ОК")
-        btn_confirm.clicked.connect(self.submit)
-        btn_confirm.adjustSize()
-
-        self.reflectField()
-
-        grid = QtWidgets.QGridLayout(self)
-        grid.setSpacing(20)
-        grid.addWidget(label_way_to_video, 1, 1)
-        grid.addWidget(self.label_way_to_video_selection, 1, 3)
-        grid.addWidget(btn_select_video, 1, 2)
-        grid.addWidget(label_way_to_save, 2, 1)
-        grid.addWidget(self.label_way_to_save_selection, 2, 3)
-        grid.addWidget(btn_select_save, 2, 2)
-        grid.addWidget(lbl_save_name, 3, 1)
-        grid.addWidget(self.box_save_name, 3, 2)
-        grid.addWidget(lbl_amount_of_frames, 4, 1)
-        grid.addWidget(self.box_amount_of_frames, 4, 2)
-        grid.addWidget(self.chbox_save_base_width, 6, 1)
-        grid.addWidget(lbl_change_to_width, 7, 1)
-        grid.addWidget(self.box_change_to_width, 7, 2)
-        grid.addWidget(btn_cancel, 8, 2)
-        grid.addWidget(btn_confirm, 8, 3)
 
 
 class OpenOld(QDialog):

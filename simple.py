@@ -57,9 +57,6 @@ class SimpleMark(QMainWindow):
         self.saver = Saver("")
         self.loader = Loader("")
         self.markWidth = 30
-        self.markWidthBox = QLineEdit(self)
-        self.moreWidButton = QPushButton(self)
-        self.lessWidButton = QPushButton(self)
         self.compressionValue = 1
 
         # количество кадров
@@ -127,39 +124,10 @@ class SimpleMark(QMainWindow):
         btn_num_image.setText("Перейти")
         btn_num_image.clicked.connect(self.clickToNumber)
 
-        lblWidth = QLabel(self)
-        lblWidth.resize(button_size, 40)
-        lblWidth.move(self.back_width + self.fr_disp_x + 5, 2 * button_size + self.fr_disp_y + 93)
-        lblWidth.setText('Ширина разметки')
-        lblWidth.setAlignment(Qt.AlignCenter)
-
-        self.markWidthBox.resize(int(0.7 * button_size), 40)
-        self.markWidthBox.move(self.back_width + self.fr_disp_x + 5, 2 * button_size + self.fr_disp_y + 138)
-        self.markWidthBox.setAlignment(Qt.AlignCenter)
-        self.markWidthBox.setPlaceholderText("Ширина")
-        self.markWidthBox.setValidator(int_validator)
-        self.markWidthBox.setMaxLength(3)
-
-        self.moreWidButton.resize(int(0.25 * button_size), 19)
-        self.moreWidButton.move(
-            int(self.back_width + self.fr_disp_x + 5 + 0.75 * button_size),
-            int(2 * button_size + self.fr_disp_y + 138)
-        )
-        self.moreWidButton.clicked.connect(self.addWidth)
-        self.moreWidButton.setIcon(QtGui.QIcon("Images/more.png"))
-        self.lessWidButton.resize(int(0.25 * button_size), 19)
-        self.lessWidButton.move(
-            int(self.back_width + self.fr_disp_x + 5 + 0.75 * button_size),
-            int(2 * button_size + self.fr_disp_y + 158)
-        )
-        self.lessWidButton.clicked.connect(self.takeWidth)
-        self.lessWidButton.setIcon(QtGui.QIcon("Images/less.png"))
-
         menu_bar = QMenuBar(self)
         file_menu = menu_bar.addMenu("     Файл     ")
         edit_menu = menu_bar.addMenu("     Правка     ")
         color_menu = menu_bar.addMenu("     Цвет меток     ")
-        tools_menu = menu_bar.addMenu("     Инструменты     ")
 
         new_action = QAction("Новый проект", self)
         new_action.setShortcut(QtGui.QKeySequence("Ctrl+N"))
@@ -215,9 +183,6 @@ class SimpleMark(QMainWindow):
         setspec_action = QAction("Выбрать...", self)
         setspec_action.triggered.connect(self.selectColor)
 
-        change_action = QAction("Выравнивание размера", self)
-        change_action.triggered.connect(self.openMarkSizeField)
-
         file_menu.addAction(new_action)
         file_menu.addAction(open_action)
         file_menu.addAction(save_action)
@@ -234,16 +199,9 @@ class SimpleMark(QMainWindow):
         color_menu.addAction(setfuchsia_action)
         color_menu.addAction(setaqua_action)
         color_menu.addAction(setspec_action)
-        tools_menu.addAction(change_action)
         menu_bar.adjustSize()
 
         self.setFocus()
-
-    def addWidth(self):
-        self.markWidthBox.setText(str(int(self.markWidthBox.text()) + 2))
-
-    def takeWidth(self):
-        self.markWidthBox.setText(str(int(self.markWidthBox.text()) - 2))
     # endregion
 
     # region События
@@ -334,6 +292,10 @@ class SimpleMark(QMainWindow):
         init_work_window = InitWorkWindow()
         init_work_window.exec()
         if init_work_window.is_initialized:
+            for element in self.marks:
+                element.setParent(None)
+                element.deleteLater()
+            self.marks.clear()
             self.video_path = init_work_window.path_to_video
             self.saves_path = os.path.join(init_work_window.path_to_save, init_work_window.name_of_save_folder)
             self.save_width = init_work_window.save_width
@@ -343,7 +305,7 @@ class SimpleMark(QMainWindow):
             self.frame_path, self.frame_name = self.vfe.getInfo()
             self.saver = Saver(self.saves_path)
             self.loader = Loader(self.saves_path)
-            self.markWidthBox.setText('30')
+            self.markWidth = int(init_work_window.box_mark_width.text())
             additional_thread = Thread(target=self.vfe.extract_frames)
             additional_thread.start()
             time.sleep(1 / self.frames_per_second + 2)
@@ -387,7 +349,6 @@ class SimpleMark(QMainWindow):
             self.frame_name = inf['image_name']
             self.frame_path = inf['image_path']
             self.markWidth = inf['mark_width']
-            self.markWidthBox.setText(str(self.markWidth))
             self.layout().addWidget(self.image_window)
             self.toImageByNumber(inf['last_frame_number'])
 
@@ -450,8 +411,6 @@ class SimpleMark(QMainWindow):
     # # Нажатие на область рисунка (да только рисунка не рамки, можно и рамки сделать только смысла нет)
     # # Всё, что происходит в момент нажатия на поле
     def onClickImage(self):
-        self.markWidth = int(self.markWidthBox.text())
-
         mark = self.setMark(mouse_position_in_image_window.x(),
             mouse_position_in_image_window.y(), self.markWidth)
 
@@ -488,37 +447,3 @@ class SimpleMark(QMainWindow):
         color_d = QtWidgets.QColorDialog()
         col = color_d.getColor()
         self.setMarkColor(col.red(), col.green(), col.blue())
-
-    def openMarkSizeField(self):
-        field = QtWidgets.QInputDialog()
-        field.exec()
-        if (field.textValue().isdigit()):
-            self.changeAllMarksSizeTo(int(field.textValue()))
-        else:
-            error = ErrorWindow("Значение указано некорректно")
-            error.exec()
-            error.deleteLater()
-        field.deleteLater()
-
-    def changeAllMarksSizeTo(self, new_size):
-        self.saveThis()
-        for way, dir, frames in os.walk(os.path.join(self.saves_path, "info")):
-            for frame in frames:
-                points = self.loader.getFramePoints(frame)
-                res = []
-                for point in points:
-                    res.append(self.setMark(point.x * self.image_window.width(),
-                                            point.y * self.image_window.height(),
-                                            new_size))
-                pts = []
-                for r in res:
-                    pts.append(Point(r.win_x / self.image_window.width(), r.win_y / self.image_window.height(), new_size))
-                self.saver.saveFramePoints(frame, pts)
-                for mark in res:
-                    mark.deleteLater()
-        for i in range(len(self.marks)):
-            self.marks[i].setParent(None)
-            self.marks[i].deleteLater()
-        self.marks = []
-        self.loadThis(self.image_number)
-        self.markWidthBox.setText(str(new_size))
