@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
 import os
-#from distutils.core import setup_keywords
 
 import pyautogui
 from threading import Thread
@@ -9,17 +8,16 @@ from saver import Saver
 from loader import Loader
 from point import Point
 
-import marker
 import styles
 from addwid import ClickableLabel, UnfocusedButton, mouse_position_in_image_window
-from caution import WarningWindow, ErrorWindow
+from caution import WarningWindow
 from marker import Mark, undo_stack, redo_stack
 import caution
 from starting import InitWorkWindow, OpenOld
 from vidext import VideoFrameExtractor
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtGui import QPixmap, QInputEvent
-from PyQt5.QtWidgets import QMainWindow, QLabel, QLineEdit, QMenuBar, QPushButton
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMainWindow, QLabel, QLineEdit, QMenuBar
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtCore import Qt
 
@@ -212,10 +210,6 @@ class SimpleMark(QMainWindow):
             self.toPreviousImage()
         if event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
             self.toNextImage()
-        if event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
-            self.addWidth()
-        if event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
-            self.takeWidth()
 
     def mouseReleaseEvent(self, event):
         self.setFocus()
@@ -447,4 +441,3 @@ class SimpleMark(QMainWindow):
         color_d = QtWidgets.QColorDialog()
         col = color_d.getColor()
         self.setMarkColor(col.red(), col.green(), col.blue())
-
